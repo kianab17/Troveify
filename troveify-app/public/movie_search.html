@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: lightblue;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #searchForm {
+            text-align: center;
+        }
+
+        #movieResults {
+            margin-top: 20px;
+            padding: 0;
+            list-style-type: none;
+        }
+
+        .movieItem {
+            background-color: #ffffff;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .checkbox {
+            margin-right: 10px;
+        }
+
+        #backButton {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #collectionsButton {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #collectionsList {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .collectionItem {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Movie Search</h1>
+    <form id="searchForm">
+        <input type="text" id="titleInput" placeholder="Enter a movie title...">
+        <input type="text" id="yearInput" placeholder="Year">
+        <input type="text" id="genreInput" placeholder="Genre">
+        <button type="submit">Search</button>
+    </form>
+    <ul id="movieResults"></ul>
+
+    <div id="backButton">
+        <button onclick="goToSelections()">Go to Selections</button>
+    </div>
+
+    <div id="collectionsButton">
+        <h2>Add to Collection</h2>
+        <ul id="collectionsList"></ul>
+    </div>
+
+    <script>
+        const apiKey = 'YOUR_API_KEY'; // Replace 'YOUR_API_KEY' with your actual API key
+        const searchForm = document.getElementById('searchForm');
+        const titleInput = document.getElementById('titleInput');
+        const yearInput = document.getElementById('yearInput');
+        const genreInput = document.getElementById('genreInput');
+        const movieResults = document.getElementById('movieResults');
+        const collectionsList = document.getElementById('collectionsList');
+
+        // Load collections from local storage
+        const collections = JSON.parse(localStorage.getItem('collections')) || [];
+
+        // Display collections in the UI
+        collections.forEach(collection => {
+            const li = document.createElement('li');
+            li.textContent = collection;
+            li.classList.add('collectionItem');
+            collectionsList.appendChild(li);
+        });
+
+        searchForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const title = titleInput.value.trim();
+            const year = yearInput.value.trim();
+            const genre = genreInput.value.trim();
+            let apiUrl = `https://api.themoviedb.org/3/search/movie?api_key=2d7c57dacba14083777991559017479b`;
+
+            if (title !== '') {
+                apiUrl += `&query=${encodeURIComponent(title)}`;
+            }
+            if (year !== '') {
+                apiUrl += `&year=${encodeURIComponent(year)}`;
+            }
+            if (genre !== '') {
+                apiUrl += `&with_genres=${encodeURIComponent(genre)}`;
+            }
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.results) {
+                        displayMovies(data.results);
+                    } else {
+                        movieResults.innerHTML = '<li>No results found</li>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    movieResults.innerHTML = '<li>Error fetching data</li>';
+                });
+        });
+
+        function displayMovies(movies) {
+            movieResults.innerHTML = '';
+            movies.forEach(movie => {
+                const li = document.createElement('li');
+                li.classList.add('movieItem');
+                li.innerHTML = `
+                    <input type="checkbox" class="checkbox" value="${movie.title}">
+                    <h3>${movie.title}</h3>
+                    <p>Release Date: ${movie.release_date}</p>
+                    <p>Popularity: ${movie.popularity}</p>
+                    <p>Vote Average: ${movie.vote_average}</p>
+                `;
+                li.addEventListener('click', function() {
+                    // Retrieve the selected collection from local storage
+                    const selectedCollection = localStorage.getItem('selectedCollection');
+                    if (selectedCollection) {
+                        // Retrieve the stored items for the selected collection or initialize an empty array
+                        let storedItems = JSON.parse(localStorage.getItem(selectedCollection)) || [];
+                        // Add the selected movie to the stored items array
+                        storedItems.push(`${movie.title} (${movie.release_date})`);
+                        // Save the updated stored items back to local storage
+                        localStorage.setItem(selectedCollection, JSON.stringify(storedItems));
+                        // Redirect the user to the collections.html file
+                        goToCollections();
+                    } else {
+                        alert('No collection selected.');
+                    }
+                });
+                movieResults.appendChild(li);
+            });
+        }
+
+        function goToSelections() {
+            window.location.href = 'selections.html';
+        }
+
+        function saveToCollection() {
+            const selectedMovies = Array.from(document.querySelectorAll('.movieItem input:checked'))
+                                            .map(checkbox => checkbox.value);
+            collections.push(...selectedMovies);
+            localStorage.setItem('collections', JSON.stringify(collections));
+            // Clear the collections list and display the updated collections
+            collectionsList.innerHTML = '';
+            collections.forEach(collection => {
+                const li = document.createElement('li');
+                li.textContent = collection;
+                li.classList.add('collectionItem');
+                collectionsList.appendChild(li);
+            });
+        }
+    
+    </script>
+</body>
+</html>
+
+
+

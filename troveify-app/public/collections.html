@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collections</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: lightblue;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #collectionForm {
+            text-align: center;
+        }
+
+        #addButton {
+            padding: 5px 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #collectionList {
+            margin-top: 20px;
+            padding: 0;
+            list-style-type: none;
+        }
+
+        .collectionItem {
+            display: inline-block;
+            background-color: #ffffff;
+            padding: 10px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+        .collectionItem:hover {
+            background-color: #f0f0f0;
+        }
+
+        #addToCollectionButton {
+            display: none;
+            margin-top: 20px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #viewCollectionButton {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .editButton,
+        .deleteButton {
+            margin-left: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Collections</h1>
+    <div id="collectionForm">
+        <button id="addButton">Add New...</button>
+        <input type="text" id="collectionInput" placeholder="Enter collection name..." style="display: none;">
+    </div>
+    <ul id="collectionList"></ul>
+
+    <button id="addToCollectionButton" onclick="goToSelections()">Add to Collection</button>
+    <button id="viewCollectionButton" onclick="viewCollection()">View Collection</button>
+    <button onclick="goBack()">Back</button>
+    <script>
+        const addButton = document.getElementById('addButton');
+        const collectionInput = document.getElementById('collectionInput');
+        const collectionList = document.getElementById('collectionList');
+        const addToCollectionButton = document.getElementById('addToCollectionButton');
+        const viewCollectionButton = document.getElementById('viewCollectionButton');
+
+        // Load collections from local storage
+        let collections = JSON.parse(localStorage.getItem('collections')) || [];
+
+        // Display existing collections in the UI
+        renderCollections();
+
+        addButton.addEventListener('click', function() {
+            collectionInput.style.display = 'inline-block';
+            collectionInput.focus();
+        });
+
+        collectionInput.addEventListener('blur', function() {
+            if (collectionInput.value.trim() === '') {
+                collectionInput.style.display = 'none';
+            }
+        });
+
+        collectionInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                const collectionName = collectionInput.value.trim();
+                if (collectionName !== '') {
+                    addCollection(collectionName);
+                    collectionInput.value = ''; // Clear input field after adding collection
+                }
+                collectionInput.style.display = 'none';
+            }
+        });
+
+        function addCollection(collectionName) {
+            collections.push({ name: collectionName, items: [] });
+            saveCollections();
+            renderCollections();
+        }
+
+        function renderCollections() {
+            collectionList.innerHTML = '';
+            collections.forEach((collection, index) => {
+                const li = document.createElement('li');
+                li.classList.add('collectionItem');
+                li.textContent = collection.name;
+                li.addEventListener('click', function() {
+                    addToCollectionButton.style.display = 'block';
+                    addToCollectionButton.textContent = `Add to ${collection.name}`;
+                    addToCollectionButton.dataset.collectionIndex = index;
+                });
+
+                const editButton = document.createElement('span');
+                editButton.classList.add('editButton');
+                editButton.innerHTML = '&#9998;';
+                editButton.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                    const newName = prompt('Enter new collection name:', collection.name);
+                    if (newName !== null && newName.trim() !== '') {
+                        collection.name = newName.trim();
+                        saveCollections();
+                        renderCollections();
+                    }
+                });
+                li.appendChild(editButton);
+
+                const deleteButton = document.createElement('span');
+                deleteButton.classList.add('deleteButton');
+                deleteButton.innerHTML = '&#128465;';
+                deleteButton.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                    const confirmDelete = confirm(`Are you sure you want to delete the collection "${collection.name}"`);
+                    if (confirmDelete) {
+                        collections.splice(index, 1);
+                        saveCollections();
+                        renderCollections();
+                    }
+                });
+                li.appendChild(deleteButton);
+
+                collectionList.appendChild(li);
+            });
+        }
+
+        function goToSelections() {
+            // Redirect the user to the selections page
+            window.location.href = 'selections.html';
+        }
+
+        function saveCollections() {
+            localStorage.setItem('collections', JSON.stringify(collections));
+        }
+
+        function viewCollection() {
+            // Retrieve the selected collection from local storage
+            const selectedCollection = localStorage.getItem('selectedCollection');
+            if (selectedCollection) {
+                // Retrieve the stored items for the selected collection
+                const storedItems = JSON.parse(localStorage.getItem(selectedCollection)) || [];
+                if (storedItems.length > 0) {
+                    // Display the stored items
+                    alert(`Items in ${selectedCollection} collection:\n${storedItems.join('\n')}`);
+                } else {
+                    alert(`No items found in ${selectedCollection} collection.`);
+                }
+            } else {
+                alert('No collection selected.');
+            }
+        }
+        function goBack() {
+            window.location.href = 'main.html';
+        }
+    </script>
+</body>
+</html>

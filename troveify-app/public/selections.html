@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selections</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: lightblue;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #buttons {
+            text-align: center;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Select Your Choice</h1>
+    <div id="buttons">
+        <button onclick="showMovies()">Movies</button>
+        <button onclick="showBooks()">Books</button>
+        <button onclick="showSongs()">Songs</button>
+        <button onclick="goBack()">Back</button>
+    </div>
+
+    <script>
+        function showMovies() {
+            window.location.href = 'movie_search.html';
+        }
+
+        function showBooks() {
+            window.location.href = 'book_search.html';
+        }
+
+        function showSongs() {
+            window.location.href = 'song_search.html';
+        }
+
+        function goBack() {
+            window.location.href = 'main.html';
+        }
+    </script>
+</body>
+</html>
+
+
+
+

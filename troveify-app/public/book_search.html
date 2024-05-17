@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Search</title>
+    <style>
+        body {
+            font-family: courier, sans-serif;
+            background-color: lightblue;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #searchForm {
+            text-align: center;
+        }
+
+        #bookResults {
+            margin-top: 20px;
+            padding: 0;
+            list-style-type: none;
+        }
+
+        .bookItem {
+            background-color: lightblue;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .checkbox {
+            margin-right: 10px;
+        }
+
+        #backButton {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Book Search</h1>
+    <form id="searchForm">
+        <input type="text" id="titleInput" placeholder="Enter a book title...">
+        <input type="text" id="yearInput" placeholder="Year">
+        <input type="text" id="genreInput" placeholder="Genre">
+        <button type="submit">Search</button>
+        <button type="button" onclick="resetSearch()">Reset</button>
+    </form>
+    <ul id="bookResults"></ul>
+    <div id="backButton">
+        <button onclick="goBack()">Go to Selections</button>
+    </div>
+    <script>
+        const searchForm = document.getElementById('searchForm');
+        const titleInput = document.getElementById('titleInput');
+        const yearInput = document.getElementById('yearInput');
+        const genreInput = document.getElementById('genreInput');
+        const bookResults = document.getElementById('bookResults');
+
+        searchForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const title = titleInput.value.trim();
+            const year = yearInput.value.trim();
+            const genre = genreInput.value.trim();
+            let apiUrl = `https://www.googleapis.com/books/v1/volumes?q=`;
+
+            if (title !== '') {
+                apiUrl += `intitle:${encodeURIComponent(title)}`;
+            }
+            if (year !== '') {
+                apiUrl += `+inpublisher:${encodeURIComponent(year)}`;
+            }
+            if (genre !== '') {
+                apiUrl += `+subject:${encodeURIComponent(genre)}`;
+            }
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.items) {
+                        displayBooks(data.items);
+                    } else {
+                        bookResults.innerHTML = '<li>No results found</li>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    bookResults.innerHTML = '<li>Error fetching data</li>';
+                });
+        });
+
+        function displayBooks(books) {
+            bookResults.innerHTML = '';
+            books.forEach(book => {
+                const li = document.createElement('li');
+                li.classList.add('bookItem');
+                li.innerHTML = `
+                    <input type="checkbox" class="checkbox" value="${book.volumeInfo.title}">
+                    <h3>${book.volumeInfo.title}</h3>
+                    <p>Author: ${book.volumeInfo.authors ? book.volumeInfo.authors.join(', ') : 'Unknown'}</p>
+                    <p>Publisher: ${book.volumeInfo.publisher ? book.volumeInfo.publisher : 'Unknown'}</p>
+                    <p>Published Date: ${book.volumeInfo.publishedDate ? book.volumeInfo.publishedDate : 'Unknown'}</p>
+                    <p>Genre: ${book.volumeInfo.categories ? book.volumeInfo.categories.join(', ') : 'Unknown'}</p>
+                    <img src="${book.volumeInfo.imageLinks ? book.volumeInfo.imageLinks.thumbnail : ''}" alt="${book.volumeInfo.title} cover">
+                `;
+                li.addEventListener('click', function() {
+                    // Retrieve the selected collection from local storage
+                    const selectedCollection = localStorage.getItem('selectedCollection');
+                    if (selectedCollection) {
+                        // Retrieve the stored items for the selected collection or initialize an empty array
+                        let storedItems = JSON.parse(localStorage.getItem(selectedCollection)) || [];
+                        // Add the selected book to the stored items array
+                        storedItems.push(`${book.volumeInfo.title} by ${book.volumeInfo.authors ? book.volumeInfo.authors.join(', ') : 'Unknown'}`);
+                        // Save the updated stored items back to local storage
+                        localStorage.setItem(selectedCollection, JSON.stringify(storedItems));
+                        // Redirect the user to the selections.html file
+                        goToCollections();
+                    } else {
+                        alert('No collection selected.');
+                    }
+                });
+                bookResults.appendChild(li);
+            });
+        }
+
+        function resetSearch() {
+            window.location.reload(); // Reload the page to reset the search
+        }
+
+        function goBack() {
+            window.location.href = 'selections.html'; // Go back to the selections page
+        }
+    </script>
+</body>
+</html>
+
+
+

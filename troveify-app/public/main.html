@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Troveify</title>
+    <style>
+        body {
+            background-color: lightblue;
+            font-family: 'Courier New', Courier, monospace, sans-serif;
+        }
+        
+        #titleScreen {
+            text-align: center;
+            margin-top: 150px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: black;
+        }
+
+        #buttons {
+            text-align: center;
+        }
+
+        button {
+            margin: 70px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="titleScreen">
+        <h1>Troveify</h1>
+        <div id="buttons">
+            <button onclick="showCollections()">Current Collections</button>
+            <button onclick="showSearch()">Search for Reccomendations</button>
+        </div>
+    </div>
+
+    <div id="searchScreen" style="display: none;">
+        <h1>Troveify</h1>
+        <div id="buttons">
+            <button onclick="showMovieSearch()">Search Movies</button>
+            <button onclick="showBookSearch()">Search Books</button>
+            <button onclick="showSongSearch()">Search Songs</button>
+            <button onclick="goBack()">Back</button>
+        </div>
+    </div>
+
+    <script>
+        function showCollections() {
+            window.location.href = 'collections.html';
+        }
+
+        function showSearch() {
+            window.location.href = 'selections.html'; // Redirect to selections.html
+        }
+
+        function showMovieSearch() {
+            window.location.href = 'movie_search.html';
+        }
+
+        function showBookSearch() {
+            window.location.href = 'book_search.html';
+        }
+
+        function showSongSearch() {
+            window.location.href = 'song_search.html';
+        }
+
+        function goBack() {
+            window.location.href = 'main.html';
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
